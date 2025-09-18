@@ -1,0 +1,73 @@
+{
+    "name": "Battery Digital Twin Model Suite",
+    "version": "2.0.0",
+    "main": "entrypoint.py",
+    "type": "model",
+    "category": "Performance",
+    "parameters": {
+        "execution": {
+            "enabled_models": {
+                "description": "Comma-separated list of models to enable (eq_cycles, voltage_monitor, imbalance_analysis, soc_ocv_estimation)",
+                "default": "eq_cycles"
+            },
+            "compute_type": {
+                "description": "Compute mode: 'incremental/full/manual loads existing output data ",
+                "default": "manual"
+            },
+            "max_days_period_compute": {
+                "description": "The number of days that the model will compute in one execution",
+                "default": 1
+            },
+            "manual_start_date": {
+                "description": "Manual start date for data slice in ISO 8601 format with timezone (YYYY-MM-DDTHH:MM:SS±HH:MM). Leave empty to use automatic date calculation",
+                "default": "2023-10-16T00:18:04+08:00"
+            },
+            "manual_end_date": {
+                "description": "Manual end date for data slice in ISO 8601 format with timezone (YYYY-MM-DDTHH:MM:SS±HH:MM). Leave empty to use automatic date calculation",
+                "default": "2023-10-16T18:59:59+00:00"
+            },
+            "debug_mode": {
+                "description": "Enable debug dashboard generation for this model",
+                "default": true
+            },
+            "upload_output": {
+                "description": "Enable output upload to altergo platform",
+                "default": false
+            }
+        },
+        "models": {
+            "eq_cycles": {
+                "inputs": {
+                    "current": {
+                    "default": "Current"
+                    },
+                    "soh": {
+                        "default": "SOH"
+                    },
+                    "capacity": {
+                        "default": "Capacity"
+                    },
+                    "initial_equivalent_cycles": {
+                        "default": "Equivalent Cycles"
+                    }
+                },
+                "outputs": {
+                    "equivalent_cycles": {
+                        "default": "Equivalent Cycles"
+                    }
+                },
+                "configuration": {
+                    "charge_efficiency": {
+                        "default": 0.98
+                    },
+                    "discharge_efficiency": {
+                        "default": 0.99
+                    },
+                    "enable_efficiency_correction": {
+                        "default": true
+                    }
+                }
+            }
+        }
+    }
+}

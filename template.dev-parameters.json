@@ -1,0 +1,7 @@
+{
+    "altergoFactoryApi" : "https://demo.altergo.io",
+    "altergoIotApi" : "https://demo.altergo.io",
+    "altergoUserApiKey" : "APIKEY",
+    "assetId": "ASSETID(See Browser)"
+
+}

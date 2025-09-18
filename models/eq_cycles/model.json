@@ -1,0 +1,61 @@
+{
+  "name": "Equivalent Cycles Estimator",
+  "version": "2.1.0",
+  "description": "Enhanced equivalent cycles estimation with efficiency corrections and SOH compensation. Backward compatible.",
+  "category": "Performance",
+  "complexity": "Simple",
+  "computational_cost": "Low",
+  "inputs": {
+    "current":{
+      "unit": "A",
+      "type": "pd.Series",
+      "description": "Battery current measurement",
+      "required": true
+    },
+    "soh":{
+      "unit": "%",
+      "type": "pd.Series",
+      "description": "State of Health (optional) - used for capacity compensation",
+      "required": false
+    },
+    "capacity":{
+      "unit": "Ah",
+      "type": "float",
+      "description": "Battery nominal capacity parameter",
+      "required": true
+    },
+    "initial_equivalent_cycles":{
+      "unit": "cycles",
+      "type": "float",
+      "initialisation_value": "equivalent_cycles",
+      "description": "Initial equivalent cycle count",
+      "required": false
+    }
+  },
+  "outputs": {
+    "equivalent_cycles":{
+      "unit": "cycles",
+      "type": "pd.Series",
+      "description": "Calculated equivalent charge/discharge cycles",
+      "decimation_threshold": 0.01
+    }
+  },
+  
+  "configuration": {
+    "charge_efficiency": {
+      "description": "Coulombic efficiency for charging (0.95-0.99)",
+      "type": "number",
+      "default": 0.98
+    },
+    "discharge_efficiency": {
+      "description": "Coulombic efficiency for discharging (0.95-0.99)",
+      "type": "number",
+      "default": 0.99
+    },
+    "enable_efficiency_correction": {
+      "description": "Enable coulombic efficiency correction",
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
