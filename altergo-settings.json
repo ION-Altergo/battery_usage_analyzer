@@ -39,7 +39,7 @@
             "eq_cycles": {
                 "inputs": {
                     "current": {
-                    "default": "Current"
+                        "default": "Current"
                     },
                     "soh": {
                         "default": "SOH"
@@ -49,6 +49,9 @@
                     },
                     "initial_equivalent_cycles": {
                         "default": "Equivalent Cycles"
+                    },
+                    "OCV_table": {
+                        "default": "BP/LFP_config"
                     }
                 },
                 "outputs": {
@@ -57,15 +60,6 @@
                     }
                 },
                 "configuration": {
-                    "charge_efficiency": {
-                        "default": 0.98
-                    },
-                    "discharge_efficiency": {
-                        "default": 0.99
-                    },
-                    "enable_efficiency_correction": {
-                        "default": true
-                    }
                 }
             }
         }

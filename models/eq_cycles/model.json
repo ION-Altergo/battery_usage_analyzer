@@ -30,6 +30,12 @@
       "initialisation_value": "equivalent_cycles",
       "description": "Initial equivalent cycle count",
       "required": false
+    },
+    "OCV_table":{
+      "unit": "V",
+      "type": "dict",
+      "description": "OCV table",
+      "required": false
     }
   },
   "outputs": {
