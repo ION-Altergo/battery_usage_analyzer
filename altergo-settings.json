@@ -7,8 +7,8 @@
     "parameters": {
         "execution": {
             "enabled_models": {
-                "description": "Comma-separated list of models to enable (eq_cycles, voltage_monitor, imbalance_analysis, soc_ocv_estimation)",
-                "default": "eq_cycles"
+                "description": "Comma-separated list of models to enable (eq_cycles, adv_eq_cycles)",
+                "default": "adv_eq_cycles"
             },
             "compute_type": {
                 "description": "Compute mode: 'incremental/full/manual loads existing output data ",
@@ -57,6 +57,38 @@
                 "outputs": {
                     "equivalent_cycles": {
                         "default": "Equivalent Cycles"
+                    }
+                },
+                "configuration": {
+                }
+            },
+            "adv_eq_cycles": {
+                "inputs": {
+                    "current": {
+                        "default": "Current"
+                    },
+                    "soc": {
+                        "default": "SoC"
+                    },
+                    "temperature": {
+                        "default": "Temp Cell Max"
+                    },
+                    "capacity": {
+                        "default": "Capacity"
+                    },
+                    "rated_cycle_count": {
+                        "default": "Cycle life"
+                    }
+                },
+                "outputs": {
+                    "std_cycle_count": {
+                        "default": "Standard Cycle Count"
+                    },
+                    "equivalent_cycle_count": {
+                        "default": "Equivalent Cycle Count"
+                    },
+                    "cycle_life_fraction": {
+                        "default": "Cycle Life Fraction"
                     }
                 },
                 "configuration": {

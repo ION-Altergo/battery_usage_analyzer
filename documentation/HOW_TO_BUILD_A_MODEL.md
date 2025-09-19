@@ -63,44 +63,76 @@ Define model metadata, inputs, outputs, and configuration:
 
 ```json
 {
-  "name": "Your Model Name",
-  "version": "1.0.0",
-  "description": "Model description",
-  "category": "Performance|Safety|Health|Other",
-  "inputs": [
-    {
-      "logical_name": "current",
+  "name": "Equivalent Cycles Estimator",
+  "version": "2.1.0",
+  "description": "Enhanced equivalent cycles estimation with efficiency corrections and SOH compensation. Backward compatible.",
+  "category": "Performance",
+  "complexity": "Simple",
+  "computational_cost": "Low",
+  "inputs": {
+    "current":{
       "unit": "A",
-      "description": "Battery current",
+      "type": "pd.Series",
+      "description": "Battery current measurement",
       "required": true
-    }
-  ],
-  "outputs": [
-    {
-      "logical_name": "output_name",
-      "unit": "unit",
-      "description": "Output description"
-    }
-  ],
-  "parameters": [
-    {
-      "logical_name": "capacity",
+    },
+    "soh":{
+      "unit": "%",
+      "type": "pd.Series",
+      "description": "State of Health (optional) - used for capacity compensation",
+      "required": false
+    },
+    "capacity":{
       "unit": "Ah",
-      "description": "Battery capacity",
+      "type": "float",
+      "description": "Battery nominal capacity parameter",
       "required": true
+    },
+    "initial_equivalent_cycles":{
+      "unit": "cycles",
+      "type": "float",
+      "initialisation_value": "equivalent_cycles",
+      "description": "Initial equivalent cycle count",
+      "required": false
+    },
+    "OCV_table":{
+      "unit": "V",
+      "type": "dict",
+      "description": "OCV table",
+      "required": false
     }
-  ],
+  },
+  "outputs": {
+    "equivalent_cycles":{
+      "unit": "cycles",
+      "type": "pd.Series",
+      "description": "Calculated equivalent charge/discharge cycles",
+      "decimation_threshold": 0.01
+    }
+  },
+  
   "configuration": {
-    "param_name": {
-      "description": "Configuration parameter",
-      "type": "number|string|boolean",
-      "default": 0
+    "charge_efficiency": {
+      "description": "Coulombic efficiency for charging (0.95-0.99)",
+      "type": "number",
+      "default": 0.98
+    },
+    "discharge_efficiency": {
+      "description": "Coulombic efficiency for discharging (0.95-0.99)",
+      "type": "number",
+      "default": 0.99
+    },
+    "enable_efficiency_correction": {
+      "description": "Enable coulombic efficiency correction",
+      "type": "boolean",
+      "default": true
     }
   }
 }
+
 ```
 
-### 5. __init__.py
+### 5. model/__init__.py
 Export your model class:
 
 ```python
@@ -108,6 +140,28 @@ from .your_model_name import YourModelName
 __all__ = ['YourModelName']
 ```
 
+### 6. models/__init__.py
+add the model to the list of registered models
+```python
+"""
+Models Package
+
+Contains all model implementations organized by functionality.
+Each model uses JSON manifests for metadata and simplified implementation.
+"""
+
+# Import all models to trigger registration decorators
+from .eq_cycles.eq_cycles_model import EqCyclesModel
+
+
+__all__ = [
+    'EqCyclesModel'
+]
+
+```
+
+### 7. altergo-settings.json
+enable the model & add the necessary key / value pair for the configuration as needed (if you don't specify the conf parameters, default values from the manifest will be used. Required inputs must be provided are required.)
 ## Key Concepts
 
 - **Logical Names**: Use consistent names for inputs/outputs (e.g., "current", "voltage", "soh")
