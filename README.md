@@ -1,132 +1,89 @@
-# Battery Digital Twin Models
+# Altergo Model Boilerplate - Setup Guide
 
-A clean 2-layer architecture for battery digital twin models on the Altergo platform, with clear separation between platform integration and battery science implementations.
+This guide explains how to clone and use the Altergo Model Boilerplate to develop battery digital twin models for the Altergo Platform.
 
-## Overview
+## Prerequisites
 
-This repository provides a framework for developing and deploying battery models as digital twins. The architecture emphasizes simplicity and maintainability with just two layers:
+Before you begin, ensure you have:
 
-1. **Digital Twin Interface** (`altergo_interface/`) - Handles all platform interactions
-2. **Battery Science Models** (`models/`) - Pure battery algorithm implementations
+- **Python 3.8+** installed on your system
+- **Git** for version control
+- **Altergo Platform Access** with valid API credentials
+- **Asset ID** from your Altergo digital twin setup
 
-## Quick Start
+## 1. Clone the Repository
 
-### Prerequisites
-
-- Python 3.8+
-- Altergo SDK
-- Required Python packages (see `requirements.txt`)
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd demo-eq-cycle-model
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure for local testing**
-   Create a `dev-parameters.json` file:
-   ```json
-   {
-       "altergoUserApiKey": "YOUR_API_KEY",
-       "altergoFactoryApi": "https://YOUR_COMPANY.altergo.io",
-       "altergoIotApi": "https://iot.YOUR_COMPANY.altergo.io",
-       "assetId": "YOUR_ASSET_ID"
-   }
-   ```
-
-4. **Run the models**
-   ```bash
-   python entrypoint.py dev-parameters.json
-   ```
-
-## Architecture
-
-### Layer 1: Digital Twin Interface (`altergo_interface/`)
-
-The unified interface layer that handles all interactions with the Altergo platform:
-
-- **`base_model.py`** - Base class that all models inherit from
-- **`models.py`** - Simple model discovery and instantiation
-- **`config.py`** - Configuration extraction and sensor mapping
-- **`data.py`** - Data loading, preparation, and model execution
-- **`output.py`** - Result uploading to the platform
-- **`utils.py`** - Common utilities (datetime parsing, etc.)
-
-### Layer 2: Battery Science Models (`models/`)
-
-Pure battery science implementations, each in its own directory:
-
-```
-models/
-├── eq_cycles/          # Equivalent cycles tracking
-├── voltage_monitor/    # Voltage monitoring and alerts
-├── imbalance_analysis/ # Cell imbalance detection
-└── soc_ocv_estimation/ # State of charge estimation
+```bash
+git clone <repository-url>
+cd model_boilerplate
 ```
 
-## Available Models
+Replace `<repository-url>` with the actual repository URL provided by your team.
 
-### 1. Equivalent Cycles (`eq_cycles`)
-Tracks cumulative battery usage by calculating equivalent full charge-discharge cycles.
+## 2. Install Dependencies
 
-**Features:**
-- Coulombic efficiency corrections
-- Optional SOH-based capacity compensation
-- Incremental or full processing modes
+The boilerplate uses the Altergo SDK and several scientific computing libraries:
 
-**Configuration:**
-- `charge_efficiency`: Charging efficiency (0.95-0.99)
-- `discharge_efficiency`: Discharging efficiency (0.95-0.99)
-- `enable_efficiency_correction`: Enable/disable efficiency corrections
+```bash
+pip install -r requirements.txt
+```
 
-### 2. Voltage Monitor (`voltage_monitor`)
-Monitors cell voltages and generates alerts for out-of-range conditions.
+This will install:
+- `altergo-sdk` (from Altergo's private repository)
+- `numpy` >= 1.20.0 (numerical computing)
+- `scipy` >= 1.7.0 (scientific computing)
+- `pandas` >= 1.3.0 (data manipulation)
+- `plotly` >= 5.0.0 (visualizations for debug mode)
 
-**Features:**
-- Configurable voltage thresholds
-- Temperature compensation support
-- Real-time status and event tracking
+## 3. Configure Development Environment
 
-### 3. Imbalance Analysis (`imbalance_analysis`)
-Analyzes voltage imbalances between cells and estimates SOC differences.
+### Create Dev Parameters File
 
-**Features:**
-- Voltage range monitoring
-- SOC imbalance estimation with confidence levels
-- Chemistry-specific OCV curves
+Copy the template configuration file:
 
-### 4. SOC/OCV Estimation (`soc_ocv_estimation`)
-Estimates state of charge from open circuit voltage during rest periods.
+```bash
+cp template.dev-parameters.json dev-parameters.json
+```
 
-**Features:**
-- Automatic rest period detection
-- Chemistry-specific lookup tables
-- Available energy calculation
+Edit `dev-parameters.json` with your specific Altergo credentials:
 
-## Configuration
+```json
+{
+    "altergoUserApiKey": "YOUR_API_KEY_HERE",
+    "altergoFactoryApi": "https://YOUR_COMPANY.altergo.io",
+    "altergoIotApi": "https://iot.YOUR_COMPANY.altergo.io",
+    "assetId": "YOUR_ASSET_ID_HERE"
+}
+```
 
-Models are configured through `altergo-settings.json`:
+**Important:** 
+- Replace `YOUR_API_KEY_HERE` with your actual Altergo API key
+- Replace `YOUR_COMPANY` with your company's Altergo subdomain
+- Replace `YOUR_ASSET_ID_HERE` with the ID of the digital twin asset you want to analyze
+
+### Configure Model Settings
+
+The main model configuration is in `altergo-settings.json`. Key settings include:
 
 ```json
 {
     "parameters": {
-        "configuration": {
-            "execution": {
-                "enabled_models": "eq_cycles,voltage_monitor",
-                "max_days_period_compute": 7
-            },
-            "models": {
-                "eq_cycles": {
-                    "debug_mode": true,
-                    "compute_type": "incremental",
-                    "charge_efficiency": 0.98
+        "execution": {
+            "enabled_models": "eq_cycles,adv_eq_cycles",
+            "compute_type": "manual",
+            "max_days_period_compute": 1,
+            "debug_mode": true,
+            "upload_output": false
+        },
+        "models": {
+            "eq_cycles": {
+                "inputs": {
+                    "current": {"default": "Current"},
+                    "capacity": {"default": "Capacity"}
+                },
+                "configuration": {
+                    "charge_efficiency": 0.98,
+                    "discharge_efficiency": 0.99
                 }
             }
         }
@@ -134,127 +91,142 @@ Models are configured through `altergo-settings.json`:
 }
 ```
 
-### Key Configuration Options
+**Key Configuration Options:**
 
-- **`enabled_models`**: Comma-separated list of models to run
-- **`compute_type`**: "incremental" or "full" processing mode
-- **`debug_mode`**: Enable debug dashboard generation
-- **Sensor mappings**: Map logical names to blueprint sensor names
+- **`enabled_models`**: Comma-separated list of models to run (e.g., "eq_cycles", "adv_eq_cycles")
+- **`compute_type`**: 
+  - `"manual"` - Process specific date range (set manual_start_date/manual_end_date)
+  - `"incremental"` - Process new data since last run
+  - `"full"` - Reprocess all available data
+- **`debug_mode`**: Set to `true` to generate HTML debug dashboards
+- **`upload_output`**: Set to `false` for local testing, `true` to upload results to platform
 
-## Creating New Models
+## 4. Test Your Setup
 
-1. **Create a new directory** under `models/`
-   ```bash
-   mkdir models/your_model
-   ```
+### Run Local Test
 
-2. **Implement the model** in `your_model.py`:
-   ```python
-   from altergo_interface import Model, register_model
-   
-   @register_model("your_model")
-   class YourModel(Model):
-       def process(self, data):
-           # Your battery science logic here
-           return {"output_name": result_series}
-   ```
+Execute the models locally with your development configuration:
 
-3. **Create a manifest** in `model.json`:
-   ```json
-   {
-       "name": "Your Model",
-       "version": "1.0.0",
-       "inputs": [
-           {"logical_name": "current", "unit": "A", "required": true}
-       ],
-       "outputs": [
-           {"logical_name": "output_name", "unit": "unit"}
-       ]
-   }
-   ```
-
-4. **Add to __init__.py**:
-   ```python
-   from .your_model import YourModel
-   ```
-
-## Deployment
-
-1. **Push to repository**
-   ```bash
-   git add .
-   git commit -m "Add new model"
-   git push
-   ```
-
-2. **Configure in Altergo Platform**
-   - Create a new function in the Altergo platform
-   - Point it to your repository
-   - Configure authentication if needed
-
-3. **Deploy and Run**
-   - The platform will automatically pull and execute your models
-   - Monitor results through the Altergo dashboard
-
-## Debugging
-
-### Debug Dashboard
-Enable debug mode for any model to generate interactive HTML dashboards:
-
-```json
-{
-    "models": {
-        "eq_cycles": {
-            "debug_mode": true
-        }
-    }
-}
+```bash
+python entrypoint.py
 ```
 
-This creates visualizations of:
-- Input sensor data quality
-- Parameter values
-- Model outputs
-- Data gaps and issues
+The system will:
+1. Load configuration from `altergo-settings.json`
+2. Connect to Altergo APIs using credentials from `dev-parameters.json`
+3. Fetch data for the configured time period
+4. Execute enabled models
+5. Generate debug outputs (if enabled)
+6. Optionally upload results to the platform
 
-### Logging
-The framework provides clean console output with:
-- Essential status messages
-- Clear error reporting
-- No excessive logging noise
+### Verify Output
 
-## Best Practices
+If successful, you should see output similar to:
 
-1. **Model Development**
-   - Keep models focused on battery science
-   - Use the `process()` method for all calculations
-   - Let the framework handle platform interactions
+```
+Starting Model Execution Framework
+Loading configuration from altergo-settings.json
+Connecting to Altergo APIs...
+Fetching data for asset: 65e7487cad25e34679d71b66
+Processing time range: 2023-10-16T00:18:04+08:00 to 2023-10-16T18:59:59+00:00
+Executing model: eq_cycles
+Model eq_cycles completed successfully
+Generated debug dashboard: debug_eq_cycles.html
+Execution completed
+```
 
-2. **Data Handling**
-   - Models receive data with logical names
-   - The framework handles all mapping and conversion
-   - Use pandas Series for time series data
+### Debug Mode Output
 
-3. **Configuration**
-   - Use sensible defaults in model.json
-   - Allow configuration overrides through altergo-settings.json
-   - Document all configuration options
+When `debug_mode` is enabled, the framework generates interactive HTML dashboards for each model:
 
-## Contributing
+- **Input Data Quality**: Visualizes sensor data gaps and quality
+- **Model Parameters**: Shows configuration values used
+- **Model Outputs**: Interactive plots of calculated results
+- **Data Statistics**: Summary statistics and validation checks
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+Open the generated HTML files in your browser to inspect the results.
 
-## License
+## 5. Directory Structure
 
-[Your License Here]
+After setup, your project structure should look like:
+
+```
+model_boilerplate/
+├── entrypoint.py              # Main execution script
+├── requirements.txt           # Python dependencies
+├── altergo-settings.json      # Model configuration
+├── dev-parameters.json        # Local dev credentials (gitignored)
+├── template.dev-parameters.json # Template for credentials
+├── models/                    # Model implementations
+│   ├── __init__.py
+│   ├── eq_cycles/            # Basic equivalent cycles model
+│   │   ├── eq_cycles_model.py
+│   │   ├── model.json
+│   │   └── README.md
+│   └── adv_eq_cycles/        # Advanced equivalent cycles
+│       ├── adv_eq_cycles.py
+│       ├── model.json
+│       └── README.md
+└── documentation/            # Project documentation
+```
+
+## 6. Common Issues and Troubleshooting
+
+### Authentication Errors
+
+If you see authentication errors:
+- Verify your API key is correct and active
+- Check that the factory and IoT API URLs match your company's setup
+- Ensure your account has access to the specified asset ID
+
+### Data Connection Issues
+
+If models can't fetch data:
+- Verify the asset ID exists and you have access
+- Check that the specified date range contains data
+- Ensure your network can reach the Altergo APIs
+
+### Missing Dependencies
+
+If you see import errors:
+- Ensure all requirements are installed: `pip install -r requirements.txt`
+- Verify you have access to the private Altergo SDK repository
+- Check Python version compatibility (3.8+)
+
+### Model Execution Errors
+
+If models fail to execute:
+- Check the logs for specific error messages
+- Verify sensor mappings in `altergo-settings.json` match your blueprint
+- Enable debug mode to see detailed data flow information
+
+## 7. Next Steps
+
+Once your setup is working:
+
+1. **Explore Existing Models**: Study the `eq_cycles` and `adv_eq_cycles` implementations to understand the pattern
+2. **Create Custom Models**: Follow the model creation guide to build your own battery analysis models
+3. **Configure for Your Data**: Adjust sensor mappings and parameters for your specific battery setup
+4. **Deploy to Production**: Configure for automatic execution on the Altergo platform
+
+## 8. Development Workflow
+
+For ongoing development:
+
+1. **Local Testing**: Always test changes locally with `debug_mode: true`
+2. **Version Control**: Commit your changes to git (excluding `dev-parameters.json`)
+3. **Model Validation**: Verify outputs make sense using debug dashboards
+4. **Platform Deployment**: Push changes and update platform configuration
+5. **Monitoring**: Monitor execution logs and results on the Altergo platform
 
 ## Support
 
 For questions or issues:
-- Check the documentation in the `documentation/` folder
-- Open an issue in the repository
-- Contact the Altergo support team
+- Check the model creation guide for implementation details
+- Review existing model examples in the `models/` directory
+- Consult the documentation in the `documentation/` folder
+- Contact your Altergo support team for platform-specific issues
+
+---
+
+**Security Note**: Never commit `dev-parameters.json` to version control as it contains sensitive API credentials. The file is already in `.gitignore`.
