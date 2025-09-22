@@ -60,6 +60,12 @@ The `model.json` file defines your model's interface. Here's a template:
       "description": "Optional parameter",
       "required": false
     }
+      "complex_input": {
+      "unit": "V",
+      "type": "Dict",
+      "description": "Optional parameter",
+      "required": false
+    }
   },
   "outputs": {
     "output_name": {

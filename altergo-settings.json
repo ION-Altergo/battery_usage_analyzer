@@ -7,8 +7,8 @@
     "parameters": {
         "execution": {
             "enabled_models": {
-                "description": "Comma-separated list of models to enable (eq_cycles, adv_eq_cycles)",
-                "default": "adv_eq_cycles"
+                "description": "Comma-separated list of models to enable (eq_cycles, battery_usage_analyzer)",
+                "default": "eq_cycles,battery_usage_analyzer"
             },
             "compute_type": {
                 "description": "Compute mode: 'incremental/full/manual loads existing output data ",
@@ -62,7 +62,7 @@
                 "configuration": {
                 }
             },
-            "adv_eq_cycles": {
+            "battery_usage_analyzer": {
                 "inputs": {
                     "current": {
                         "default": "Current"
@@ -70,28 +70,49 @@
                     "soc": {
                         "default": "SoC"
                     },
-                    "temperature": {
+                    "v_cell_min": {
+                        "default": "Minimum Voltage"
+                    },
+                    "v_cell_max": {
+                        "default": "Maximum Voltage"
+                    },
+                    "t_cell_min": {
+                        "default": "Temp Cell Min"
+                    },
+                    "t_cell_max": {
                         "default": "Temp Cell Max"
-                    },
-                    "capacity": {
-                        "default": "Capacity"
-                    },
-                    "rated_cycle_count": {
-                        "default": "Cycle life"
                     }
                 },
                 "outputs": {
-                    "std_cycle_count": {
-                        "default": "Standard Cycle Count"
+                    "seg_l0_id": {
+                        "default": "Operating_Mode_Segment_ID"
                     },
-                    "equivalent_cycle_count": {
-                        "default": "Equivalent Cycle Count"
+                    "mode": {
+                        "default": "Operating_Mode"
                     },
-                    "cycle_life_fraction": {
-                        "default": "Cycle Life Fraction"
+                    "boundary_l1": {
+                        "default": "Change_Point_Boundary"
+                    },
+                    "seg_l1_id": {
+                        "default": "Change_Point_Segment_ID"
+                    },
+                    "phase": {
+                        "default": "Battery_Phase"
+                    },
+                    "seg_l2_id": {
+                        "default": "Phase_Segment_ID"
                     }
                 },
                 "configuration": {
+                    "window_s": 5.0,
+                    "i_rest_th_A": 0.5,
+                    "i_charge_on_A": 2.0,
+                    "i_discharge_on_A": 2.0,
+                    "min_state_duration_s": 60.0,
+                    "min_seg_duration_s": 120.0,
+                    "min_phase_duration_s": 60.0,
+                    "change_quantile": 0.97,
+                    "enable_rainflow": false
                 }
             }
         }

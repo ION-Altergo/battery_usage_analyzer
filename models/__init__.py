@@ -7,10 +7,10 @@ Each model uses JSON manifests for metadata and simplified implementation.
 
 # Import all models to trigger registration decorators
 from .eq_cycles.eq_cycles_model import EqCyclesModel
-from .adv_eq_cycles.adv_eq_cycles import EnhancedEquivalentCycles
+from .battery_usage_analyzer.battery_usage_analyzer import BatteryUsageAnalyzer
 
 
 __all__ = [
     'EqCyclesModel',
-    'EnhancedEquivalentCycles'
+    'BatteryUsageAnalyzer'
 ]

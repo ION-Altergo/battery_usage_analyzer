@@ -1,0 +1,192 @@
+{
+  "name": "Battery Usage Analyzer",
+  "version": "1.0.0",
+  "description": "Multi-layer battery usage timeline segmentation: operating modes (L0), data-driven change points (L1), and domain phases (L2).",
+  "category": "Other",
+  "complexity": "Medium",
+  "computational_cost": "Medium",
+  "inputs": {
+    "current": {
+      "unit": "A",
+      "type": "pd.Series",
+      "description": "Battery current measurement (+charge / -discharge)",
+      "required": true
+    },
+    "soc": {
+      "unit": "%",
+      "type": "pd.Series",
+      "description": "State of charge in [0-1] or percentage (auto-normalized)",
+      "required": true
+    },
+    "v_cell_min": {
+      "unit": "V",
+      "type": "pd.Series",
+      "description": "Minimum cell voltage",
+      "required": true
+    },
+    "v_cell_max": {
+      "unit": "V",
+      "type": "pd.Series",
+      "description": "Maximum cell voltage",
+      "required": true
+    },
+    "t_cell_min": {
+      "unit": "°C",
+      "type": "pd.Series",
+      "description": "Minimum cell temperature",
+      "required": true
+    },
+    "t_cell_max": {
+      "unit": "°C",
+      "type": "pd.Series",
+      "description": "Maximum cell temperature",
+      "required": true
+    }
+  },
+  "outputs": {
+    "seg_l0_id": {
+      "unit": "id",
+      "type": "pd.Series",
+      "description": "Operating mode segment IDs (Layer 0)",
+      "decimation_threshold": 0.01
+    },
+    "mode": {
+      "unit": "label",
+      "type": "pd.Series",
+      "description": "Operating mode labels: charge|discharge|idle",
+      "decimation_threshold": 0.01
+    },
+    "boundary_l1": {
+      "unit": "0/1",
+      "type": "pd.Series",
+      "description": "Data-driven change point boundary markers (Layer 1)",
+      "decimation_threshold": 0.01
+    },
+    "seg_l1_id": {
+      "unit": "id",
+      "type": "pd.Series",
+      "description": "Data-driven change point segment IDs (Layer 1)",
+      "decimation_threshold": 0.01
+    },
+    "phase": {
+      "unit": "label",
+      "type": "pd.Series",
+      "description": "Domain phase labels: rest|cv_charge|cc_charge|cc_discharge|discharge|idle",
+      "decimation_threshold": 0.01
+    },
+    "seg_l2_id": {
+      "unit": "id",
+      "type": "pd.Series",
+      "description": "Domain phase segment IDs (Layer 2)",
+      "decimation_threshold": 0.01
+    },
+    "segment_summary": {
+      "unit": "various",
+      "type": "pd.DataFrame",
+      "description": "Consolidated segment summary with statistical aggregations and metadata",
+      "decimation_threshold": 0.01
+    }
+  },
+  "configuration": {
+    "window_s": {
+      "description": "Smoothing window for signals (seconds)",
+      "type": "number",
+      "default": 5.0
+    },
+    "i_rest_th_A": {
+      "description": "Rest threshold for |current| (Amperes)",
+      "type": "number",
+      "default": 0.5
+    },
+    "i_charge_on_A": {
+      "description": "Charge mode threshold for current ≥ ... (Amperes)",
+      "type": "number",
+      "default": 2.0
+    },
+    "i_discharge_on_A": {
+      "description": "Discharge mode threshold for current ≤ -... (Amperes)",
+      "type": "number",
+      "default": 2.0
+    },
+    "min_state_duration_s": {
+      "description": "Minimum dwell time for L0 operating modes (seconds)",
+      "type": "number",
+      "default": 60.0
+    },
+    "min_seg_duration_s": {
+      "description": "Minimum duration between L1 change point boundaries (seconds)",
+      "type": "number",
+      "default": 120.0
+    },
+    "min_phase_duration_s": {
+      "description": "Minimum duration between L2 phase boundaries (seconds)",
+      "type": "number",
+      "default": 60.0
+    },
+    "change_quantile": {
+      "description": "Quantile threshold for change score detection (0–1)",
+      "type": "number",
+      "default": 0.97
+    },
+    "w_current": {
+      "description": "Weight for dI/dt in change score computation",
+      "type": "number",
+      "default": 1.0
+    },
+    "w_soc": {
+      "description": "Weight for dSoC/dt in change score computation",
+      "type": "number",
+      "default": 0.5
+    },
+    "w_vmin": {
+      "description": "Weight for dVmin/dt in change score computation",
+      "type": "number",
+      "default": 0.8
+    },
+    "w_vmax": {
+      "description": "Weight for dVmax/dt in change score computation",
+      "type": "number",
+      "default": 0.8
+    },
+    "w_tmin": {
+      "description": "Weight for dTmin/dt in change score computation",
+      "type": "number",
+      "default": 0.3
+    },
+    "w_tmax": {
+      "description": "Weight for dTmax/dt in change score computation",
+      "type": "number",
+      "default": 0.3
+    },
+    "cv_voltage_window_V": {
+      "description": "Voltage window below max to consider CV charging (Volts)",
+      "type": "number",
+      "default": 0.03
+    },
+    "dv_dt_small_V_per_s": {
+      "description": "Small dV/dt threshold to confirm CV plateau (V/s)",
+      "type": "number",
+      "default": 0.0002
+    },
+    "enable_rainflow": {
+      "description": "Enable SoC rainflow-based extra boundary detection",
+      "type": "boolean",
+      "default": false
+    },
+    "rf_min_range_soc_pct": {
+      "description": "Minimum SoC range (%) to register a rainflow boundary",
+      "type": "number",
+      "default": 5.0
+    },
+    "nominal_capacity_Ah": {
+      "description": "Nominal battery capacity for C-rate calculations (Ah)",
+      "type": "number",
+      "default": 100.0
+    },
+    "nominal_voltage_V": {
+      "description": "Nominal battery voltage for stress analysis (V)",
+      "type": "number",
+      "default": 3.7
+    }
+  }
+}
